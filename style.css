@@ -206,22 +206,25 @@ body {
 /* Modal de QR Code */
 .qr-card {
   text-align: center;
-  max-width: 480px;
+  max-width: 440px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 1.5rem 1.6rem;
 }
 
 .qr-instructions {
-  font-size: 0.95rem;
+  font-size: 0.88rem;
   color: var(--text-muted);
-  margin-bottom: 1.25rem;
-  line-height: 1.4;
+  margin-bottom: 0.8rem;
+  line-height: 1.35;
 }
 
 .qrcode-wrapper {
   background: #ffffff;
-  padding: 16px;
-  border-radius: 18px;
+  padding: 10px;
+  border-radius: 14px;
   display: inline-block;
-  margin: 0 auto 1.25rem auto;
+  margin: 0 auto 0.8rem auto;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(251, 145, 56, 0.3);
 }
 
@@ -234,25 +237,25 @@ body {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .qr-room-tag {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.2);
-  padding: 0.4rem 0.8rem;
+  padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
 }
 
 .qr-status-tag {
   background: rgba(251, 145, 56, 0.15);
   border: 1px solid var(--brand-orange);
   color: var(--brand-orange);
-  padding: 0.4rem 0.8rem;
+  padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 700;
 }
 

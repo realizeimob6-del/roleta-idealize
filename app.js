@@ -231,12 +231,16 @@ class RouletteApp {
     const remoteUrl = `${baseUrl}remote.html?room=${this.roomCode}`;
 
     const qrContainer = document.getElementById('qrcode-container');
+    const qrSidebar = document.getElementById('qrcode-sidebar-container');
     const roomCodeDisplay = document.getElementById('qr-room-code');
+    const sidebarRoomCode = document.getElementById('sidebar-room-code');
     const directLinkInput = document.getElementById('qr-direct-link');
 
     if (roomCodeDisplay) roomCodeDisplay.textContent = this.roomCode;
+    if (sidebarRoomCode) sidebarRoomCode.textContent = `SALA: ${this.roomCode}`;
     if (directLinkInput) directLinkInput.value = remoteUrl;
 
+    // 1. Renderizar no Modal Principal
     if (qrContainer) {
       qrContainer.innerHTML = '';
       let generated = false;
@@ -244,8 +248,8 @@ class RouletteApp {
         try {
           new QRCode(qrContainer, {
             text: remoteUrl,
-            width: 210,
-            height: 210,
+            width: 180,
+            height: 180,
             colorDark: '#002e15',
             colorLight: '#ffffff',
             correctLevel: QRCode.CorrectLevel.M
@@ -256,10 +260,35 @@ class RouletteApp {
         }
       }
 
-      // Fallback garantido se QRCode JS falhar ou for bloqueado
       if (!generated || qrContainer.children.length === 0) {
         const encodedUrl = encodeURIComponent(remoteUrl);
-        qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=210x210&data=${encodedUrl}&color=002e15" alt="QR Code" width="210" height="210" style="display:block;margin:0 auto;border-radius:10px;">`;
+        qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodedUrl}&color=002e15" alt="QR Code" width="180" height="180" style="display:block;margin:0 auto;border-radius:10px;">`;
+      }
+    }
+
+    // 2. Renderizar na Barra Lateral Fixa
+    if (qrSidebar) {
+      qrSidebar.innerHTML = '';
+      let generatedSidebar = false;
+      if (typeof QRCode !== 'undefined') {
+        try {
+          new QRCode(qrSidebar, {
+            text: remoteUrl,
+            width: 140,
+            height: 140,
+            colorDark: '#002e15',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+          });
+          generatedSidebar = true;
+        } catch (err) {
+          console.warn('QRCode sidebar error:', err);
+        }
+      }
+
+      if (!generatedSidebar || qrSidebar.children.length === 0) {
+        const encodedUrl = encodeURIComponent(remoteUrl);
+        qrSidebar.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodedUrl}&color=002e15" alt="QR Code" width="140" height="140" style="display:block;margin:0 auto;border-radius:8px;">`;
       }
     }
   }

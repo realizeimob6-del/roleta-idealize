@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Roleta Premiada - Sábado Sonho Real</title>
-  <link rel="stylesheet" href="style.css?v=3">
+  <link rel="stylesheet" href="style.css?v=4">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -95,6 +95,21 @@
 
       <!-- Barra Lateral: Histórico de Ganhadores e Prêmios Ativos -->
       <aside class="sidebar-panel">
+        <div class="panel-section qr-sidebar-card">
+          <div class="section-header">
+            <h3>📱 Celular / Controle</h3>
+            <button id="btn-expand-qr" class="btn-text" onclick="if(window.rouletteApp) { window.rouletteApp.openQrModal(); } else { document.getElementById('qr-modal').showModal(); }">Ver Grande</button>
+          </div>
+          <div style="text-align: center;">
+            <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.6rem;">Aponte a câmera para girar pelo celular:</p>
+            <div id="qrcode-sidebar-container" class="qrcode-wrapper" style="padding: 8px; margin-bottom: 0.5rem; cursor: pointer;" onclick="if(window.rouletteApp) { window.rouletteApp.openQrModal(); }"></div>
+            <div style="display:flex; justify-content:space-around; align-items:center; font-size:0.78rem;">
+              <span id="sidebar-room-code" style="color:var(--brand-orange); font-weight:800;">SALA: ...</span>
+              <span id="sidebar-status-tag" style="color:#00e676; font-weight:700;">● Online</span>
+            </div>
+          </div>
+        </div>
+
         <div class="panel-section">
           <div class="section-header">
             <h3>🎁 Prêmios Disponíveis (<span id="prizes-count">0</span>)</h3>
@@ -223,6 +238,6 @@
 
   <script src="assets/qrcode.min.js"></script>
   <script src="assets/paho-mqtt.min.js"></script>
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
