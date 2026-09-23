@@ -164,6 +164,8 @@ class RouletteApp {
     this.prizes = this.loadPrizes();
     this.history = this.loadHistory();
     this.autoRemove = localStorage.getItem('roleta_auto_remove') === 'true';
+    this.roomCode = this.getOrInitRoomCode();
+    this.mqttClient = null;
 
     this.currentRotation = 0; // em radianos
     this.isSpinning = false;
@@ -178,6 +180,7 @@ class RouletteApp {
     this.updatePrizesPreview();
     this.renderHistory();
     this.bindEvents();
+    this.initRemoteSync();
   }
 
   loadPrizes() {
@@ -204,6 +207,111 @@ class RouletteApp {
 
   saveHistory() {
     localStorage.setItem('roleta_feirao_history', JSON.stringify(this.history));
+  }
+
+  getOrInitRoomCode() {
+    let code = localStorage.getItem('roleta_room_code');
+    if (!code) {
+      code = 'IDEALIZE-' + Math.floor(1000 + Math.random() * 9000);
+      localStorage.setItem('roleta_room_code', code);
+    }
+    return code;
+  }
+
+  initRemoteSync() {
+    // Obter URL pública para o controle mobile
+    let baseUrl = window.location.href.split('index.html')[0].split('#')[0].split('?')[0];
+    if (!baseUrl.endsWith('/')) baseUrl += '/';
+    const remoteUrl = `${baseUrl}remote.html?room=${this.roomCode}`;
+
+    const qrContainer = document.getElementById('qrcode-container');
+    const roomCodeDisplay = document.getElementById('qr-room-code');
+    const directLinkInput = document.getElementById('qr-direct-link');
+
+    if (roomCodeDisplay) roomCodeDisplay.textContent = this.roomCode;
+    if (directLinkInput) directLinkInput.value = remoteUrl;
+
+    if (qrContainer && typeof QRCode !== 'undefined') {
+      qrContainer.innerHTML = '';
+      try {
+        new QRCode(qrContainer, {
+          text: remoteUrl,
+          width: 200,
+          height: 200,
+          colorDark: '#002e15',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+      } catch (err) {
+        console.warn('Erro ao gerar QRCode:', err);
+      }
+    }
+
+    if (typeof Paho !== 'undefined') {
+      this.connectMQTT();
+    }
+  }
+
+  connectMQTT() {
+    const topic = `idealize/roleta/${this.roomCode}`;
+    const clientId = `tv_${this.roomCode}_${Math.random().toString(16).substr(2, 6)}`;
+    
+    try {
+      this.mqttClient = new Paho.MQTT.Client('broker.emqx.io', 8084, '/mqtt', clientId);
+
+      this.mqttClient.onConnectionLost = (responseObject) => {
+        setTimeout(() => this.connectMQTT(), 3000);
+      };
+
+      this.mqttClient.onMessageArrived = (message) => {
+        try {
+          const data = JSON.parse(message.payloadString);
+          if (data.action === 'phone_connected') {
+            const statusTag = document.getElementById('qr-status-tag');
+            if (statusTag) {
+              statusTag.textContent = '🟢 Celular Conectado!';
+              statusTag.classList.add('connected');
+            }
+          } else if (data.action === 'spin_request') {
+            if (data.clientName) {
+              this.clientInput.value = data.clientName;
+            }
+            const qrModal = document.getElementById('qr-modal');
+            if (qrModal && qrModal.open) qrModal.close();
+
+            this.spin();
+          }
+        } catch (e) {
+          console.error('MQTT error:', e);
+        }
+      };
+
+      this.mqttClient.connect({
+        useSSL: true,
+        timeout: 5,
+        onSuccess: () => {
+          this.mqttClient.subscribe(topic);
+        },
+        onFailure: (err) => {
+          setTimeout(() => this.connectMQTT(), 4000);
+        }
+      });
+    } catch (e) {
+      console.warn('Falha Paho MQTT:', e);
+    }
+  }
+
+  publishRemote(data) {
+    try {
+      if (this.mqttClient && this.mqttClient.isConnected()) {
+        const topic = `idealize/roleta/${this.roomCode}`;
+        const msg = new Paho.MQTT.Message(JSON.stringify(data));
+        msg.destinationName = topic;
+        this.mqttClient.send(msg);
+      }
+    } catch (e) {
+      console.warn('Erro ao publicar:', e);
+    }
   }
 
   initDOM() {
@@ -344,6 +452,36 @@ class RouletteApp {
     document.getElementById('btn-export-history').addEventListener('click', () => {
       this.exportHistoryCSV();
     });
+
+    // Modal de QR Code / Controle Mobile
+    const btnOpenQr = document.getElementById('btn-open-qr');
+    const qrModal = document.getElementById('qr-modal');
+    const btnCloseQr = document.getElementById('btn-close-qr');
+    const btnCopyQr = document.getElementById('btn-copy-qr-link');
+
+    if (btnOpenQr && qrModal) {
+      btnOpenQr.addEventListener('click', () => {
+        qrModal.showModal();
+      });
+    }
+
+    if (btnCloseQr && qrModal) {
+      btnCloseQr.addEventListener('click', () => {
+        qrModal.close();
+      });
+    }
+
+    if (btnCopyQr) {
+      btnCopyQr.addEventListener('click', () => {
+        const input = document.getElementById('qr-direct-link');
+        input.select();
+        navigator.clipboard.writeText(input.value);
+        btnCopyQr.textContent = 'Copiado! ✅';
+        setTimeout(() => {
+          btnCopyQr.textContent = 'Copiar Link';
+        }, 2000);
+      });
+    }
   }
 
   renderWheel() {
@@ -450,6 +588,11 @@ class RouletteApp {
     this.btnSpinAction.disabled = true;
     this.toggleLightsAnimation(true);
 
+    this.publishRemote({
+      action: 'spinning',
+      clientName: this.clientInput.value.trim() || 'Cliente VIP'
+    });
+
     // Calcular vencedor com base nos pesos
     const totalWeight = this.prizes.reduce((sum, p) => sum + (Number(p.weight) || 1), 0);
     let randomNum = Math.random() * totalWeight;
@@ -544,6 +687,13 @@ class RouletteApp {
     document.getElementById('winner-client-display').textContent = clientName;
     document.getElementById('winner-prize-name').textContent = winningPrize.name;
     this.winnerModal.showModal();
+
+    // Notificar controle no celular
+    this.publishRemote({
+      action: 'winner',
+      prize: winningPrize.name,
+      clientName: clientName
+    });
 
     // Se configurado para remover prêmio após vitória
     if (this.autoRemove || winningPrize.removeOnWin) {

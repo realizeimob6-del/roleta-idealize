@@ -31,6 +31,12 @@
       </div>
 
       <div class="header-actions">
+        <button id="btn-open-qr" class="btn-icon highlight-btn" title="Controle pelo Celular (QR Code)">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M4 4h6v6H4V4zm2 2v2h2V6H6zm8-2h6v6h-6V4zm2 2v2h2V6h-2zM4 14h6v6H4v-6zm2 2v2h2v-2H6zm10 0h2v2h-2v-2zm-2-2h2v2h-2v-2zm4 0h2v2h-2v-2zm-2 4h2v2h-2v-2zm2 2h2v2h-2v-2zM14 6h2v2h-2V6zm-8 8h2v2H6v-2z"/>
+          </svg>
+          <span>📱 Celular / QR</span>
+        </button>
         <button id="btn-fullscreen" class="btn-icon" title="Tela Cheia (Ideal para TVs)">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
             <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
@@ -191,8 +197,32 @@
         </div>
       </div>
     </dialog>
+
+    <!-- Modal do QR Code para Controle Remoto no Celular -->
+    <dialog id="qr-modal" class="custom-dialog">
+      <div class="modal-content qr-card">
+        <div class="modal-header">
+          <h2>📱 Controle a Roleta pelo Celular</h2>
+          <button id="btn-close-qr" class="btn-close">&times;</button>
+        </div>
+        <div class="qr-body">
+          <p class="qr-instructions">Aponte a câmera do seu smartphone para o QR Code abaixo para abrir o controle e disparar o giro direto do celular!</p>
+          <div id="qrcode-container" class="qrcode-wrapper"></div>
+          <div class="qr-info-pills">
+            <span class="qr-room-tag">SALA: <strong id="qr-room-code">...</strong></span>
+            <span id="qr-status-tag" class="qr-status-tag">🟡 Aguardando Celular...</span>
+          </div>
+          <div class="qr-link-copy">
+            <input type="text" id="qr-direct-link" readonly>
+            <button id="btn-copy-qr-link" class="btn-secondary small">Copiar Link</button>
+          </div>
+        </div>
+      </div>
+    </dialog>
   </div>
 
+  <script src="assets/qrcode.min.js"></script>
+  <script src="assets/paho-mqtt.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
