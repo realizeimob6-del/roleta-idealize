@@ -218,8 +218,14 @@ class RouletteApp {
     return code;
   }
 
-  initRemoteSync() {
-    // Obter URL pública para o controle mobile
+  openQrModal() {
+    const qrModal = document.getElementById('qr-modal');
+    if (!qrModal) return;
+    qrModal.showModal();
+    this.renderQrCode();
+  }
+
+  renderQrCode() {
     let baseUrl = window.location.href.split('index.html')[0].split('#')[0].split('?')[0];
     if (!baseUrl.endsWith('/')) baseUrl += '/';
     const remoteUrl = `${baseUrl}remote.html?room=${this.roomCode}`;
@@ -231,21 +237,35 @@ class RouletteApp {
     if (roomCodeDisplay) roomCodeDisplay.textContent = this.roomCode;
     if (directLinkInput) directLinkInput.value = remoteUrl;
 
-    if (qrContainer && typeof QRCode !== 'undefined') {
+    if (qrContainer) {
       qrContainer.innerHTML = '';
-      try {
-        new QRCode(qrContainer, {
-          text: remoteUrl,
-          width: 200,
-          height: 200,
-          colorDark: '#002e15',
-          colorLight: '#ffffff',
-          correctLevel: QRCode.CorrectLevel.M
-        });
-      } catch (err) {
-        console.warn('Erro ao gerar QRCode:', err);
+      let generated = false;
+      if (typeof QRCode !== 'undefined') {
+        try {
+          new QRCode(qrContainer, {
+            text: remoteUrl,
+            width: 210,
+            height: 210,
+            colorDark: '#002e15',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.M
+          });
+          generated = true;
+        } catch (err) {
+          console.warn('QRCode JS error:', err);
+        }
+      }
+
+      // Fallback garantido se QRCode JS falhar ou for bloqueado
+      if (!generated || qrContainer.children.length === 0) {
+        const encodedUrl = encodeURIComponent(remoteUrl);
+        qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=210x210&data=${encodedUrl}&color=002e15" alt="QR Code" width="210" height="210" style="display:block;margin:0 auto;border-radius:10px;">`;
       }
     }
+  }
+
+  initRemoteSync() {
+    this.renderQrCode();
 
     if (typeof Paho !== 'undefined') {
       this.connectMQTT();
