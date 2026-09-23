@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roleta Premiada - Sábado Sonho Real</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Canvas para confetes em tela cheia -->
+  <canvas id="confetti-canvas"></canvas>
+
+  <div class="app-container">
+    <!-- Barra Superior / Header do Evento -->
+    <header class="event-header">
+      <div class="header-brand">
+        <img src="assets/logo_idealize.png" alt="IdeAlize Imobiliária" class="brand-logo">
+      </div>
+
+      <div class="event-title-container">
+        <div class="header-badges">
+          <span class="badge highlight">🔑 ENTRADA ZERO</span>
+          <span class="badge success">⚡ ANÁLISE NA HORA</span>
+          <span class="badge gold">✨ SONHO REALIZADO</span>
+        </div>
+        <h1 id="event-title" contenteditable="true" title="Clique para editar o título">SÁBADO CHAVE NA MÃO</h1>
+        <p id="event-subtitle" contenteditable="true" title="Clique para editar o subtítulo">Feirão Casa Própria IdeAlize • Gire a Roleta da Conquista e Leve Seu Prêmio!</p>
+      </div>
+
+      <div class="header-actions">
+        <button id="btn-fullscreen" class="btn-icon" title="Tela Cheia (Ideal para TVs)">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+          </svg>
+          <span>Tela Cheia</span>
+        </button>
+        <button id="btn-sound-toggle" class="btn-icon" title="Ativar/Desativar Som">
+          <svg id="sound-icon-on" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+          </svg>
+          <span id="sound-status">Som Ligado</span>
+        </button>
+        <button id="btn-open-settings" class="btn-icon" title="Gerenciar Prêmios">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+          </svg>
+          <span>Editar Prêmios</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Área Principal de Sorteio -->
+    <main class="main-content">
+      <div class="wheel-stage">
+        <!-- Indicador/Ponteiro Superior -->
+        <div class="pointer-wrapper">
+          <div class="wheel-pointer"></div>
+        </div>
+
+        <!-- Container da Roleta -->
+        <div class="wheel-outer-glow">
+          <div class="wheel-bezel">
+            <!-- Luzinhas em volta da borda -->
+            <div id="lights-ring" class="lights-ring"></div>
+            <canvas id="wheel-canvas" width="680" height="680"></canvas>
+            <button id="btn-spin-center" class="center-spin-button" aria-label="Girar Roleta">
+              <span class="spin-text">GIRAR!</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Controles rápidos do cliente / giro -->
+        <div class="spin-controls">
+          <div class="client-input-card">
+            <label for="client-name">Nome do Cliente / Contemplado (Opcional):</label>
+            <div class="input-with-button">
+              <input type="text" id="client-name" placeholder="Ex: Maria dos Santos / Unidade 402" autocomplete="off">
+              <button id="btn-spin-action" class="btn-primary-action">
+                <span class="btn-glow"></span>
+                <span class="btn-label">RODAR ROLETA 🚀</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Barra Lateral: Histórico de Ganhadores e Prêmios Ativos -->
+      <aside class="sidebar-panel">
+        <div class="panel-section">
+          <div class="section-header">
+            <h3>🎁 Prêmios Disponíveis (<span id="prizes-count">0</span>)</h3>
+            <button id="btn-quick-manage" class="btn-text">Personalizar</button>
+          </div>
+          <ul id="prizes-list-preview" class="prizes-preview-list">
+            <!-- Injetado dinamicamente -->
+          </ul>
+        </div>
+
+        <div class="panel-section history-section">
+          <div class="section-header">
+            <h3>🏆 Histórico do Feirão</h3>
+            <button id="btn-clear-history" class="btn-text danger" title="Limpar histórico">Limpar</button>
+          </div>
+          <div id="history-empty" class="history-empty">
+            Nenhum prêmio sorteado ainda. Que comecem os giros da sorte!
+          </div>
+          <ul id="history-list" class="history-list">
+            <!-- Injetado dinamicamente -->
+          </ul>
+          <button id="btn-export-history" class="btn-secondary" style="display: none;">
+            📥 Baixar Relatório (CSV)
+          </button>
+        </div>
+      </aside>
+    </main>
+
+    <!-- Modal de Vitória (Dialog) -->
+    <dialog id="winner-modal" class="custom-dialog">
+      <div class="modal-content winner-card">
+        <div class="winner-shine"></div>
+        <div class="winner-icon-burst">🎉</div>
+        <span class="winner-tag">PARABÉNS! VOCÊ FOI PREMIADO!</span>
+        <h2 id="winner-client-display" class="winner-client">Novo Morador!</h2>
+        <div class="prize-trophy-box">
+          <div class="prize-category-label">PRÊMIO GANHO:</div>
+          <div id="winner-prize-name" class="winner-prize">Air Fryer Digital</div>
+        </div>
+        <p class="winner-message">O sonho da casa própria agora está completo com esse presentaço!</p>
+        <div class="modal-actions">
+          <button id="btn-close-winner" class="btn-primary-action">CONTINUAR FESTA 👏</button>
+        </div>
+      </div>
+    </dialog>
+
+    <!-- Modal de Configurações / Edição de Prêmios -->
+    <dialog id="settings-modal" class="custom-dialog">
+      <div class="modal-content settings-card">
+        <div class="modal-header">
+          <h2>⚙️ Gerenciador de Prêmios & Roleta</h2>
+          <button id="btn-close-settings" class="btn-close">&times;</button>
+        </div>
+
+        <div class="settings-body">
+          <div class="setting-group">
+            <label class="setting-title">Sugestões de Título para o Evento:</label>
+            <div class="event-presets">
+              <button class="preset-btn" data-title="SÁBADO CHAVE NA MÃO" data-sub="Feirão Casa Própria • Zero Entrada & Análise Imediata">Sábado Chave na Mão</button>
+              <button class="preset-btn" data-title="GIRO DO SONHO REAL" data-sub="Análise na Hora • Entrada Zero • Seu Novo Lar com Prêmios!">Giro do Sonho Real</button>
+              <button class="preset-btn" data-title="MEGA FEIRÃO ZERO ENTRADA" data-sub="Muitos Sonhos Realizados • Gire e Ganhe Prêmios para Casa Nova">Mega Feirão Zero Entrada</button>
+              <button class="preset-btn" data-title="SÁBADO DA CONQUISTA" data-sub="Aprovação na Hora & Prêmios Exclusivos da Casa Própria">Sábado da Conquista</button>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <div class="section-flex-title">
+              <label class="setting-title">Itens da Roleta:</label>
+              <button id="btn-add-prize" class="btn-secondary small">+ Novo Prêmio</button>
+            </div>
+            <div class="table-container">
+              <table id="prizes-table" class="prizes-table">
+                <thead>
+                  <tr>
+                    <th>Cor</th>
+                    <th>Nome do Prêmio</th>
+                    <th>Peso/Chance</th>
+                    <th>Remover se Sair?</th>
+                    <th>Ações</th>
+                  </tr>
+                </thead>
+                <tbody id="prizes-table-body">
+                  <!-- Gerado via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="setting-group">
+            <label class="checkbox-option">
+              <input type="checkbox" id="setting-auto-remove">
+              <span>Remover automaticamente prêmios sorteados da roleta</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="btn-reset-default-prizes" class="btn-secondary">Restaurar Padrão do Feirão</button>
+          <button id="btn-save-settings" class="btn-primary-action">Salvar e Atualizar Roleta</button>
+        </div>
+      </div>
+    </dialog>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
