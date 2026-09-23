@@ -221,8 +221,13 @@ class RouletteApp {
   openQrModal() {
     const qrModal = document.getElementById('qr-modal');
     if (!qrModal) return;
-    qrModal.showModal();
+    qrModal.classList.add('active');
     this.renderQrCode();
+  }
+
+  closeQrModal() {
+    const qrModal = document.getElementById('qr-modal');
+    if (qrModal) qrModal.classList.remove('active');
   }
 
   renderQrCode() {
@@ -231,16 +236,12 @@ class RouletteApp {
     const remoteUrl = `${baseUrl}remote.html?room=${this.roomCode}`;
 
     const qrContainer = document.getElementById('qrcode-container');
-    const qrSidebar = document.getElementById('qrcode-sidebar-container');
     const roomCodeDisplay = document.getElementById('qr-room-code');
-    const sidebarRoomCode = document.getElementById('sidebar-room-code');
     const directLinkInput = document.getElementById('qr-direct-link');
 
     if (roomCodeDisplay) roomCodeDisplay.textContent = this.roomCode;
-    if (sidebarRoomCode) sidebarRoomCode.textContent = `SALA: ${this.roomCode}`;
     if (directLinkInput) directLinkInput.value = remoteUrl;
 
-    // 1. Renderizar no Modal Principal
     if (qrContainer) {
       qrContainer.innerHTML = '';
       let generated = false;
@@ -263,32 +264,6 @@ class RouletteApp {
       if (!generated || qrContainer.children.length === 0) {
         const encodedUrl = encodeURIComponent(remoteUrl);
         qrContainer.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodedUrl}&color=002e15" alt="QR Code" width="180" height="180" style="display:block;margin:0 auto;border-radius:10px;">`;
-      }
-    }
-
-    // 2. Renderizar na Barra Lateral Fixa
-    if (qrSidebar) {
-      qrSidebar.innerHTML = '';
-      let generatedSidebar = false;
-      if (typeof QRCode !== 'undefined') {
-        try {
-          new QRCode(qrSidebar, {
-            text: remoteUrl,
-            width: 140,
-            height: 140,
-            colorDark: '#002e15',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.M
-          });
-          generatedSidebar = true;
-        } catch (err) {
-          console.warn('QRCode sidebar error:', err);
-        }
-      }
-
-      if (!generatedSidebar || qrSidebar.children.length === 0) {
-        const encodedUrl = encodeURIComponent(remoteUrl);
-        qrSidebar.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodedUrl}&color=002e15" alt="QR Code" width="140" height="140" style="display:block;margin:0 auto;border-radius:8px;">`;
       }
     }
   }
@@ -871,6 +846,38 @@ class RouletteApp {
     this.prizes = newPrizes;
   }
 }
+
+// Funções Globais para o Modal de QR Code
+window.openQrModal = function() {
+  if (window.rouletteApp) {
+    window.rouletteApp.openQrModal();
+  } else {
+    const modal = document.getElementById('qr-modal');
+    if (modal) modal.classList.add('active');
+  }
+};
+
+window.closeQrModal = function() {
+  if (window.rouletteApp) {
+    window.rouletteApp.closeQrModal();
+  } else {
+    const modal = document.getElementById('qr-modal');
+    if (modal) modal.classList.remove('active');
+  }
+};
+
+window.copyQrLink = function() {
+  const input = document.getElementById('qr-direct-link');
+  if (input) {
+    input.select();
+    navigator.clipboard.writeText(input.value);
+    const btn = document.getElementById('btn-copy-qr-link');
+    if (btn) {
+      btn.textContent = 'Copiado! ✅';
+      setTimeout(() => btn.textContent = 'Copiar Link', 2000);
+    }
+  }
+};
 
 // Inicializar quando o DOM estiver pronto
 window.addEventListener('DOMContentLoaded', () => {
